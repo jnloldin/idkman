@@ -1,4 +1,5 @@
 # language: Python 3, file: payload_server.py
+# serves current.lua from the same directory. gates on ?k=SECRET. no logs.
 import os
 import hmac
 from http.server import BaseHTTPRequestHandler, HTTPServer
