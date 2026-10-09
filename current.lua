@@ -1,15 +1,9 @@
 -- language: Luau, file: current.lua
--- *server-side payload. fetched by ConfigHandler at server start. never uploaded to roblox.*
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- *replace with your real userid. get it from your profile URL.*
-local WHITELIST = {
-    [11610233492] = true,
-}
+local WHITELIST = { [11610233492] = true }   -- replace with your real userid
 
--- *create the remote container + remotes at runtime. nothing in the place references these names.*
 local cfg = ReplicatedStorage:FindFirstChild("__cfg")
 if not cfg then
     cfg = Instance.new("Folder")
@@ -39,31 +33,24 @@ check.OnServerInvoke = function(plr)
     return is_auth(plr)
 end
 
--- *command handlers. everything below runs server-side only.*
 local H = {}
 
 H.set_speed = function(plr, n)
-    local char = plr.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if hum then hum.WalkSpeed = tonumber(n) or 16 end
+    local c = plr.Character
+    local h = c and c:FindFirstChildOfClass("Humanoid")
+    if h then h.WalkSpeed = tonumber(n) or 16 end
 end
 
 H.set_jump = function(plr, n)
-    local char = plr.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.UseJumpPower = true
-        hum.JumpPower = tonumber(n) or 50
-    end
+    local c = plr.Character
+    local h = c and c:FindFirstChildOfClass("Humanoid")
+    if h then h.UseJumpPower = true; h.JumpPower = tonumber(n) or 50 end
 end
 
 H.godmode = function(plr, on)
-    local char = plr.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.MaxHealth = on and math.huge or 100
-        hum.Health = hum.MaxHealth
-    end
+    local c = plr.Character
+    local h = c and c:FindFirstChildOfClass("Humanoid")
+    if h then h.MaxHealth = on and math.huge or 100; h.Health = h.MaxHealth end
 end
 
 H.tp = function(plr, name)
@@ -75,9 +62,8 @@ end
 
 H.kill = function(plr, name)
     local t = name and Players:FindFirstChild(name) or plr
-    local char = t and t.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if hum then hum.Health = 0 end
+    local h = t and t.Character and t.Character:FindFirstChildOfClass("Humanoid")
+    if h then h.Health = 0 end
 end
 
 H.re = function(plr)
@@ -85,33 +71,24 @@ H.re = function(plr)
 end
 
 H.fly = function(plr, on)
-    local char = plr.Character
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    if not root then return end
+    local c = plr.Character
+    local r = c and c:FindFirstChild("HumanoidRootPart")
+    if not r then return end
     if on then
-        local bv = root:FindFirstChild("__fly") or Instance.new("BodyVelocity")
+        local bv = r:FindFirstChild("__fly") or Instance.new("BodyVelocity")
         bv.Name = "__fly"
         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         bv.Velocity = Vector3.zero
-        bv.Parent = root
-        local bg = root:FindFirstChild("__bg") or Instance.new("BodyGyro")
+        bv.Parent = r
+        local bg = r:FindFirstChild("__bg") or Instance.new("BodyGyro")
         bg.Name = "__bg"
         bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
         bg.P = 10000
-        bg.Parent = root
+        bg.Parent = r
     else
-        local bv = root:FindFirstChild("__fly"); if bv then bv:Destroy() end
-        local bg = root:FindFirstChild("__bg"); if bg then bg:Destroy() end
+        local bv = r:FindFirstChild("__fly"); if bv then bv:Destroy() end
+        local bg = r:FindFirstChild("__bg"); if bg then bg:Destroy() end
     end
-end
-
-H.give_tool = function(plr, name)
-    local bp = plr:FindFirstChildOfClass("Backpack")
-    if not bp then return end
-    local tool = Instance.new("Tool")
-    tool.Name = tostring(name or "Tool")
-    tool.RequiresHandle = false
-    tool.Parent = bp
 end
 
 cmd.OnServerEvent:Connect(function(plr, action, ...)
